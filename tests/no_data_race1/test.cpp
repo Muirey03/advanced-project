@@ -1,0 +1,36 @@
+//
+// Created by tommy on 14/11/2024.
+//
+
+#include <thread>
+#include <pthread.h>
+#include <test_utils.h>
+
+extern OSObject *gObj1;
+extern OSObject *gObj2;
+extern pthread_mutex_t *p_lock;
+pthread_mutex_t g_lock;
+
+void thread_func() {
+  // test with external pointer to lock:
+  pthread_mutex_lock(p_lock);
+  gObj1->release();
+  gObj1 = nullptr;
+  pthread_mutex_unlock(p_lock);
+
+  // test with reference to lock structure:
+  pthread_mutex_lock(&g_lock);
+  gObj2->release();
+  gObj2 = nullptr;
+  pthread_mutex_unlock(&g_lock);
+}
+
+int main() {
+  pthread_mutex_init(&g_lock, NULL);
+
+  std::thread t1(thread_func);
+  std::thread t2(thread_func);
+  t1.join();
+  t2.join();
+  return 0;
+}

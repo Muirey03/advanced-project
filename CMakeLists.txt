@@ -11,8 +11,10 @@ set(CSA_EXECUTABLE "${CMAKE_BINARY_DIR}/llvm/llvm/bin/clang++")
 add_subdirectory(tests)
 
 # Run all tests
+set(ALL_TESTS "")
+list(APPEND ALL_TESTS basic_data_race1)
+list(APPEND ALL_TESTS no_data_race1)
 add_custom_target(all_tests
-        COMMAND ${CMAKE_COMMAND} --build . --target basic_data_race1
-        DEPENDS basic_data_race1
+        COMMAND ${CMAKE_COMMAND} --build . --target ${ALL_TESTS}
         COMMENT "Running all tests:"
 )
