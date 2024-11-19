@@ -7,8 +7,8 @@
 
 class OSObject {
 public:
-	void release(void);
-    void retain(void);
+	void release();
+	void retain();
 };
 
 #endif //TEST_UTILS_H
