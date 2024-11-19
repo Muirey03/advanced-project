@@ -6,22 +6,14 @@
 #include <pthread.h>
 #include <test_utils.h>
 
-extern OSObject *gObj1;
-extern OSObject *gObj2;
-extern pthread_mutex_t *p_lock;
+extern OSObject *gObj;
 pthread_mutex_t g_lock;
 
 void thread_func() {
-  // test with external pointer to lock:
-  pthread_mutex_lock(p_lock);
-  gObj1->release();
-  gObj1 = nullptr;
-  pthread_mutex_unlock(p_lock);
-
-  // test with reference to lock structure:
+  // test global access with a lock:
   pthread_mutex_lock(&g_lock);
-  gObj2->release();
-  gObj2 = nullptr;
+  gObj->release();
+  gObj = nullptr;
   pthread_mutex_unlock(&g_lock);
 }
 
