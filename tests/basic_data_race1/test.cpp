@@ -9,8 +9,10 @@ extern OSObject *gObj;
 
 void thread_func() {
   // test with no lock:
-  gObj->release();
-  gObj = nullptr;
+  if (gObj) {
+    gObj->release();
+    gObj = nullptr;
+  }
 }
 
 int main() {

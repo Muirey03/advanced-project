@@ -12,8 +12,10 @@ pthread_mutex_t g_lock;
 void thread_func() {
   // test global access with a lock:
   pthread_mutex_lock(&g_lock);
-  gObj->release();
-  gObj = nullptr;
+  if (gObj) {
+    gObj->release();
+    gObj = nullptr;
+  }
   pthread_mutex_unlock(&g_lock);
 }
 
