@@ -5,7 +5,10 @@
 #ifndef TEST_UTILS_H
 #define TEST_UTILS_H
 
-class OSObject {
+class OSMetaClassBase {
+};
+
+class OSObject : public OSMetaClassBase {
 public:
 	void release();
 	void retain();
