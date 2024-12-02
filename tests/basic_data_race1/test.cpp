@@ -16,6 +16,7 @@ void thread_func() {
 }
 
 int main() {
+  gObj = OSObject::create();
   std::thread t1(thread_func);
   std::thread t2(thread_func);
   t1.join();

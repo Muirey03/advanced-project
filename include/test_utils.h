@@ -10,8 +10,9 @@ class OSMetaClassBase {
 
 class OSObject : public OSMetaClassBase {
 public:
-	void release();
-	void retain();
+	static OSObject* create() { return new OSObject(); }
+	void release() {}
+	void retain() {}
 };
 
 #endif //TEST_UTILS_H

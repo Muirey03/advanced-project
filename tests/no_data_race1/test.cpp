@@ -20,6 +20,7 @@ void thread_func() {
 }
 
 int main() {
+  gObj = OSObject::create();
   pthread_mutex_init(&g_lock, NULL);
 
   std::thread t1(thread_func);
