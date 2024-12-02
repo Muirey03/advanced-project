@@ -9,7 +9,7 @@ function(add_simple_unit_test TEST_NAME SOURCES)
     endif()
 
     add_custom_target(${TEST_NAME}
-            COMMAND ${CSA_EXECUTABLE} ${CSA_CFLAGS} --analyze -Xclang -analyzer-checker=alpha.security.RacyUAF ${SOURCES}
+            COMMAND ${CSA_EXECUTABLE} ${CSA_CFLAGS} --analyze --analyzer-no-default-checks -Xclang -analyzer-checker=alpha.security.RacyUAF ${SOURCES}
             DEPENDS clang
             COMMENT "Running test \"${TEST_NAME}\":"
     )
