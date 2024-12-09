@@ -10,7 +10,7 @@ extern OSObject *gObj;
 void thread_func() {
   // test with no lock:
   if (gObj) {
-    gObj->release();
+    gObj->release(); // BUG
     gObj = nullptr;
   }
 }
