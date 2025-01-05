@@ -9,8 +9,6 @@
 extern OSObject *gObj;
 pthread_mutex_t g_lock;
 
-__attribute__((noinline)) void test_func(OSObject *obj, OSObject* obj2) {}
-
 void thread_func() {
   // pthread_mutex_lock(&g_lock);
   OSObject* stackRef = gObj;
@@ -21,8 +19,7 @@ void thread_func() {
 
   pthread_mutex_lock(&g_lock);
   if (stackRef) {
-    // stackRef->release(); // BUG
-    test_func(stackRef, gObj);
+    stackRef->release(); // BUG
     gObj = nullptr;
   }
   pthread_mutex_unlock(&g_lock);
