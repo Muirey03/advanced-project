@@ -22,5 +22,20 @@ function(add_simple_unit_test TEST_NAME SOURCES)
     )
 endfunction()
 
-add_subdirectory(basic_data_race1)
-add_subdirectory(no_data_race1)
+set(ALL_TESTS
+        basic_data_race1
+        no_data_race1
+        general_race1
+        no_general_race1
+)
+
+foreach(test_dir IN LISTS ALL_TESTS)
+    add_subdirectory(${test_dir})
+endforeach()
+
+# Run all tests
+add_custom_target(all_tests
+        COMMAND ${CMAKE_COMMAND} --build .. --target ${ALL_TESTS}
+        DEPENDS clang
+        COMMENT "Running all tests:"
+)
