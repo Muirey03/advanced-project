@@ -10,12 +10,10 @@ extern OSObject *gObj;
 pthread_mutex_t g_lock;
 
 void thread_func() {
+  // this is safe, as we take the lock before we save any stack references
   pthread_mutex_lock(&g_lock);
   OSObject* stackRef = gObj;
-  pthread_mutex_unlock(&g_lock);
 
-  pthread_mutex_lock(&g_lock);
-  stackRef = gObj; // re-reading gObj ensures it is still alive
   if (stackRef) {
     stackRef->release(); // NOBUG
     gObj = nullptr;

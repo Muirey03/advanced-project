@@ -10,14 +10,10 @@ extern OSObject *gObj;
 pthread_mutex_t g_lock;
 
 void thread_func() {
-  // pthread_mutex_lock(&g_lock);
+  // this is unsafe, as gObj can be destroyed before the lock is acquired
   OSObject* stackRef = gObj;
-  // pthread_mutex_unlock(&g_lock);
-
-  // dropping the lock here means that stackRef could be destroyed
-  // as there are no stack references to it
-
   pthread_mutex_lock(&g_lock);
+
   if (stackRef) {
     stackRef->release(); // BUG
     gObj = nullptr;
