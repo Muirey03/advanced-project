@@ -29,6 +29,8 @@ set(ALL_TESTS
         no_general_race1
         general_race2
         no_general_race2
+        general_race3
+        general_race4
 )
 
 foreach (test_dir IN LISTS ALL_TESTS)
