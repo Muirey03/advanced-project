@@ -4,9 +4,9 @@ function(add_simple_unit_test TEST_NAME SOURCES)
 
     # on macOS you may want to use a different sysroot when running the CSA
     # add -DCSA_SYSROOT=... to your cmake command to define it:
-    if(DEFINED CSA_SYSROOT AND CSA_SYSROOT)
+    if (DEFINED CSA_SYSROOT AND CSA_SYSROOT)
         list(APPEND CSA_CFLAGS "-isysroot" "${CSA_SYSROOT}")
-    endif()
+    endif ()
 
     add_custom_target(${TEST_NAME}
             COMMAND ${CSA_EXECUTABLE} ${CSA_CFLAGS} --analyze --analyzer-no-default-checks -Xclang -analyzer-checker=alpha.security.RacyUAF ${SOURCES}
@@ -28,11 +28,12 @@ set(ALL_TESTS
         general_race1
         no_general_race1
         general_race2
+        no_general_race2
 )
 
-foreach(test_dir IN LISTS ALL_TESTS)
+foreach (test_dir IN LISTS ALL_TESTS)
     add_subdirectory(${test_dir})
-endforeach()
+endforeach ()
 
 # Run all tests
 add_custom_target(all_tests
