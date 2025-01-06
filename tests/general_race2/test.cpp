@@ -6,12 +6,12 @@
 #include <pthread.h>
 #include <test_utils.h>
 
-extern OSObject *gObj;
+OSObject *gObj;
 pthread_mutex_t g_lock;
 
 void thread_func() {
   pthread_mutex_lock(&g_lock);
-  OSObject* stackRef = gObj;
+  OSObject *stackRef = gObj;
   pthread_mutex_unlock(&g_lock);
 
   // dropping the lock here means that gObj could be destroyed
@@ -19,18 +19,23 @@ void thread_func() {
 
   pthread_mutex_lock(&g_lock);
   if (stackRef) {
-    stackRef->release(); // BUG
-    gObj = nullptr;
+    stackRef->memberFn(); // BUG
+    if (gObj) {
+      gObj->release();
+      gObj = nullptr;
+    }
   }
   pthread_mutex_unlock(&g_lock);
 }
 
 int main() {
-  gObj = OSObject::create();
   pthread_mutex_init(&g_lock, NULL);
-  std::thread t1(thread_func);
-  std::thread t2(thread_func);
-  t1.join();
-  t2.join();
+  for (;;) {
+    gObj = OSObject::create();
+    std::thread t1(thread_func);
+    std::thread t2(thread_func);
+    t1.join();
+    t2.join();
+  }
   return 0;
 }
