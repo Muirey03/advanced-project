@@ -5,7 +5,7 @@
 #include <thread>
 #include <test_utils.h>
 
-extern OSObject *gObj;
+OSObject *gObj;
 
 void thread_func() {
   // test with no lock:
@@ -16,10 +16,12 @@ void thread_func() {
 }
 
 int main() {
-  gObj = OSObject::create();
-  std::thread t1(thread_func);
-  std::thread t2(thread_func);
-  t1.join();
-  t2.join();
+  for (;;) {
+    gObj = OSObject::create();
+    std::thread t1(thread_func);
+    std::thread t2(thread_func);
+    t1.join();
+    t2.join();
+  }
   return 0;
 }
