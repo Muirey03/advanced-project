@@ -5,7 +5,8 @@ project(advanced-project)
 add_subdirectory(llvm/llvm)
 
 # Define the path to the CSA clang++ executable
-set(CSA_EXECUTABLE "${CMAKE_BINARY_DIR}/llvm/llvm/bin/clang++")
+set(CSA_C_EXECUTABLE "${CMAKE_BINARY_DIR}/llvm/llvm/bin/clang")
+set(CSA_CXX_EXECUTABLE "${CMAKE_BINARY_DIR}/llvm/llvm/bin/clang++")
 
 # Add unit tests subproject
 add_subdirectory(tests)

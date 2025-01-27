@@ -1,6 +1,11 @@
 function(add_simple_unit_test TEST_NAME SOURCES)
     set(INCLUDE_DIR "${CMAKE_SOURCE_DIR}/include")
-    set(CSA_CFLAGS "-I${INCLUDE_DIR}")
+    set(CSA_CFLAGS
+            --analyze
+            --analyzer-no-default-checks
+            -Xclang
+            -analyzer-checker=alpha.security.RacyUAF
+    )
 
     # on macOS you may want to use a different sysroot when running the CSA
     # add -DCSA_SYSROOT=... to your cmake command to define it:
@@ -9,7 +14,7 @@ function(add_simple_unit_test TEST_NAME SOURCES)
     endif ()
 
     add_custom_target(${TEST_NAME}
-            COMMAND ${CSA_EXECUTABLE} ${CSA_CFLAGS} --analyze --analyzer-no-default-checks -Xclang -analyzer-checker=alpha.security.RacyUAF ${SOURCES}
+            COMMAND ${CSA_CXX_EXECUTABLE} ${CSA_CFLAGS} -I${INCLUDE_DIR} ${SOURCES}
             DEPENDS clang
             COMMENT "Running test \"${TEST_NAME}\":"
     )
@@ -31,6 +36,7 @@ set(ALL_TESTS
         no_general_race2
         general_race3
         general_race4
+        data_race2
 )
 
 foreach (test_dir IN LISTS ALL_TESTS)
@@ -43,3 +49,6 @@ add_custom_target(all_tests
         DEPENDS clang
         COMMENT "Running all tests:"
 )
+
+# Larger tests are not included in ALL_TESTS
+add_subdirectory(chromeos-powervr)
