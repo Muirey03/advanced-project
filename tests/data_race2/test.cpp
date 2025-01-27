@@ -30,7 +30,10 @@ void thread_func() {
   pthread_mutex_unlock(&g_lock);
 
   OSObject *field = obj->field0;
-  field->memberFn(); // BUG (if strict, otherwise NOBUG)
+  field->memberFn(); // BUG (if strict, otherwise NOBUG) TODO: actually I think this is NOT a bug
+  //  we hold a reference on obj, and we can assume that obj holds a reference on field0,
+  //  so field is guaranteed to be safe to access.
+  //  HOWEVER, field0's fields themselves cannot be accessed outside of a lock in STRICT mode.
 
   obj->release();
 }
