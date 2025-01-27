@@ -89,17 +89,17 @@ DevmemIntAcquireRemoteCtx(PMR *psPMR,
   PDLLIST_NODE psListNode, psListNodeNext;
   DEVMEMINT_CTX_EXPORT *psCtxExport;
 
-  OSWRLockAcquireRead(g_hExportCtxListLock);
+  OSWRLockAcquireRead(g_hExportCtxListLock);        // <----------------- lock the list lock
   /* Find context from list using PMR as key */
   dllist_foreach_node(&g_sExportCtxList, psListNode, psListNodeNext)
   {
     psCtxExport = IMG_CONTAINER_OF(psListNode, DEVMEMINT_CTX_EXPORT, sNode);
-    if (psCtxExport->psPMR == psPMR)
+    if (psCtxExport->psPMR == psPMR)           // <---------------- if PMR object is equal
     {
-      OSWRLockReleaseRead(g_hExportCtxListLock);
-      DevmemIntCtxAcquire(psCtxExport->psDevmemCtx);
-      *ppsContext = psCtxExport->psDevmemCtx;
-      *phPrivData = psCtxExport->psDevmemCtx->hPrivData;
+      OSWRLockReleaseRead(g_hExportCtxListLock);      // <------------ [1] unlock the list lock
+      DevmemIntCtxAcquire(psCtxExport->psDevmemCtx);  // <--------- [2] increase refcount
+      *ppsContext = psCtxExport->psDevmemCtx;         // <-------------- [3]get the object
+      *phPrivData = psCtxExport->psDevmemCtx->hPrivData;  // <---------- [4]get the object
 
       /* PMR should have been already exported to import it
        * If a PMR is exported, its immutable and the same is
