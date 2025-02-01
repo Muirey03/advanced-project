@@ -1,20 +1,16 @@
+set(CSA_CFLAGS "--analyze --analyzer-no-default-checks -Xclang -analyzer-checker=alpha.security.RacyUAF")
+# on macOS you may want to use a different sysroot when running the CSA
+# add -DCSA_SYSROOT=... to your cmake command to define it:
+if (DEFINED CSA_SYSROOT AND CSA_SYSROOT)
+    set(CSA_CFLAGS "${CSA_CFLAGS} -isysroot ${CSA_SYSROOT}")
+endif ()
+separate_arguments(CSA_CFLAGS_LIST UNIX_COMMAND ${CSA_CFLAGS})
+
 function(add_simple_unit_test TEST_NAME SOURCES)
     set(INCLUDE_DIR "${CMAKE_SOURCE_DIR}/include")
-    set(CSA_CFLAGS
-            --analyze
-            --analyzer-no-default-checks
-            -Xclang
-            -analyzer-checker=alpha.security.RacyUAF
-    )
-
-    # on macOS you may want to use a different sysroot when running the CSA
-    # add -DCSA_SYSROOT=... to your cmake command to define it:
-    if (DEFINED CSA_SYSROOT AND CSA_SYSROOT)
-        list(APPEND CSA_CFLAGS "-isysroot" "${CSA_SYSROOT}")
-    endif ()
 
     add_custom_target(${TEST_NAME}
-            COMMAND ${CSA_CXX_EXECUTABLE} ${CSA_CFLAGS} -I${INCLUDE_DIR} ${SOURCES}
+            COMMAND ${CSA_CXX_EXECUTABLE} ${CSA_CFLAGS_LIST} -I${INCLUDE_DIR} ${SOURCES}
             DEPENDS clang
             COMMENT "Running test \"${TEST_NAME}\":"
     )
