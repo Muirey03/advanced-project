@@ -1,3 +1,4 @@
+set(CSA ${CSA_CXX_EXECUTABLE})
 set(CSA_CFLAGS "--analyze --analyzer-no-default-checks -Xclang -analyzer-checker=alpha.security.RacyUAF")
 # on macOS you may want to use a different sysroot when running the CSA
 # add -DCSA_SYSROOT=... to your cmake command to define it:
@@ -10,7 +11,7 @@ function(add_simple_unit_test TEST_NAME SOURCES)
     set(INCLUDE_DIR "${CMAKE_SOURCE_DIR}/include")
 
     add_custom_target(${TEST_NAME}
-            COMMAND ${CSA_CXX_EXECUTABLE} ${CSA_CFLAGS_LIST} -I${INCLUDE_DIR} ${SOURCES}
+            COMMAND ${CSA} ${CSA_CFLAGS_LIST} -I${INCLUDE_DIR} ${SOURCES}
             DEPENDS clang
             COMMENT "Running test \"${TEST_NAME}\":"
     )
