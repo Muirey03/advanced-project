@@ -1,5 +1,5 @@
 set(CSA ${CSA_CXX_EXECUTABLE})
-set(CSA_CFLAGS "--analyze --analyzer-no-default-checks -Xclang -analyzer-checker=alpha.security.RacyUAF")
+set(CSA_CFLAGS "-fdiagnostics-color=always --analyze --analyzer-no-default-checks -Xclang -analyzer-checker=alpha.security.RacyUAF")
 # on macOS you may want to use a different sysroot when running the CSA
 # add -DCSA_SYSROOT=... to your cmake command to define it:
 if (DEFINED CSA_SYSROOT AND CSA_SYSROOT)
