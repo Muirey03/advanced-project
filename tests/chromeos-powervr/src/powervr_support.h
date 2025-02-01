@@ -18,7 +18,7 @@
 
 /* Get a structure's address from the address of a member */
 #define IMG_CONTAINER_OF(ptr, type, member) \
-(type *) ((uintptr_t) (ptr) - offsetof(type, member))
+(type *) (ptr); _Static_assert(offsetof(type, member) == 0)
 
 /* Get a new pointer with an offset (in bytes) from a base address, useful
  * when traversing byte buffers and accessing data in buffers through struct

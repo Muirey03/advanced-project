@@ -56,10 +56,10 @@ struct _DEVMEMINT_CTX_
 
 struct _DEVMEMINT_CTX_EXPORT_
 {
+	DLLIST_NODE sNode;
   DEVMEMINT_CTX *psDevmemCtx;
   PMR *psPMR;
   ATOMIC_T hRefCount;
-  DLLIST_NODE sNode;
 };
 
 /*************************************************************************/ /*!
