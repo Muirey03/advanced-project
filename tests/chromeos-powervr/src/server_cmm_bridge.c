@@ -67,7 +67,7 @@ struct _DEVMEMINT_CTX_EXPORT_
 @Description    Acquire a reference to the provided device memory context.
 @Return         None
 */ /**************************************************************************/
-static INLINE void DevmemIntCtxAcquire(DEVMEMINT_CTX *psDevmemCtx)
+void DevmemIntCtxAcquire(RETAINED DEVMEMINT_CTX *psDevmemCtx)
 {
   OSAtomicIncrement(&psDevmemCtx->hRefCount);
 }
@@ -83,7 +83,7 @@ static DLLIST_NODE g_sExportCtxList;
 
 PVRSRV_ERROR
 DevmemIntAcquireRemoteCtx(PMR *psPMR,
-                          DEVMEMINT_CTX **ppsContext,
+                          RETURNS_RETAINED DEVMEMINT_CTX **ppsContext,
                           IMG_HANDLE *phPrivData)
 {
   PDLLIST_NODE psListNode, psListNodeNext;

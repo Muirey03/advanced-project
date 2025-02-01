@@ -61,7 +61,7 @@ DevmemIntCtxDestroy(DEVMEMINT_CTX *psDevmemCtx);
 
 PVRSRV_ERROR
 DevmemIntAcquireRemoteCtx(PMR *psPMR,
-                          DEVMEMINT_CTX **ppsContext,
+                          RETURNS_RETAINED DEVMEMINT_CTX **ppsContext,
                           IMG_HANDLE *phPrivData);
 
 #endif /* DEVICEMEM_SERVER_H */

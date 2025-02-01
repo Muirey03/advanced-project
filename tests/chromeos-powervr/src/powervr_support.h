@@ -13,6 +13,8 @@
 
 #define INLINE inline
 #define __packed __attribute__((__packed__))
+#define RETAINED __attribute__((annotate("rc_ownership_retained")))
+#define RETURNS_RETAINED __attribute__((annotate("rc_ownership_returns_retained")))
 
 #include "dllist.h"
 
