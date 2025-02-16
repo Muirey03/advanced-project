@@ -44,7 +44,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 // clang-format off
 
-struct _DEVMEMINT_CTX_
+struct TRACKED _DEVMEMINT_CTX_
 {
   ATOMIC_T hRefCount;
 
@@ -83,7 +83,7 @@ static DLLIST_NODE g_sExportCtxList;
 
 PVRSRV_ERROR
 DevmemIntAcquireRemoteCtx(PMR *psPMR,
-                          RETURNS_RETAINED DEVMEMINT_CTX **ppsContext,
+                          /*RETURNS_RETAINED*/ DEVMEMINT_CTX **ppsContext,
                           IMG_HANDLE *phPrivData)
 {
   PDLLIST_NODE psListNode, psListNodeNext;
@@ -96,8 +96,8 @@ DevmemIntAcquireRemoteCtx(PMR *psPMR,
     psCtxExport = IMG_CONTAINER_OF(psListNode, DEVMEMINT_CTX_EXPORT, sNode);
     if (psCtxExport->psPMR == psPMR)           // <---------------- if PMR object is equal
     {
-      OSWRLockReleaseRead(g_hExportCtxListLock);      // <------------ [1] unlock the list lock
-      DevmemIntCtxAcquire(psCtxExport->psDevmemCtx);  // <--------- [2] increase refcount
+    	OSWRLockReleaseRead(g_hExportCtxListLock);      // <------------ [1] unlock the list lock
+    	DevmemIntCtxAcquire(psCtxExport->psDevmemCtx);  // <--------- [2] increase refcount
       *ppsContext = psCtxExport->psDevmemCtx;         // <-------------- [3]get the object
       *phPrivData = psCtxExport->psDevmemCtx->hPrivData;  // <---------- [4]get the object
 
