@@ -36,6 +36,7 @@ set(ALL_TESTS
         no_general_race2
         general_race3
         general_race4
+        general_race5
         #        data_race2
         chromeos-powervr
 )

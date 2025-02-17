@@ -6,6 +6,26 @@
 #define TEST_UTILS_H
 
 #include <atomic>
+#include <pthread.h>
+
+#define RETAINED __attribute__((annotate("rc_ownership_retained")))
+#define CONSUMED __attribute__((annotate("rc_ownership_consumed")))
+#define RETURNS_RETAINED __attribute__((annotate("rc_ownership_returns_retained")))
+#define TRACKED __attribute__((annotate("rc_ownership_tracked")))
+
+struct TRACKED rc_object {
+	std::atomic<int> refcnt{1};
+	pthread_mutex_t lock;
+	void *data;
+	size_t sz;
+};
+
+void rc_obj_retain(RETAINED struct rc_object *obj);
+
+void rc_obj_release(CONSUMED struct rc_object *obj);
+
+inline void rc_obj_lock(struct rc_object *obj) { pthread_mutex_lock(&obj->lock); }
+inline void rc_obj_unlock(struct rc_object *obj) { pthread_mutex_unlock(&obj->lock); }
 
 class OSMetaClassBase {
 };
