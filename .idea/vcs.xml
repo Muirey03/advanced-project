@@ -3,5 +3,6 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/llvm" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/tests/xnu/darwin-xnu-build" vcs="Git" />
   </component>
 </project>
