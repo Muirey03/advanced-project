@@ -1,0 +1,4 @@
+#!/bin/bash
+pushd darwin-xnu-build
+MACOS_VERSION='14.5' KERNEL_CONFIG=RELEASE ARCH_CONFIG=ARM64 MACHINE_CONFIG=VMAPPLE JSONDB=1 ./build.sh
+popd
