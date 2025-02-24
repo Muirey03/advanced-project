@@ -5,7 +5,7 @@ CMAKE_BUILD_DIR=../../cmake-build-release/
 cmake --build ${CMAKE_BUILD_DIR} --target clang --target diagtool --target clang-extdef-mapping
 CSA=$(realpath ${CMAKE_BUILD_DIR}/llvm/llvm/bin/clang)
 
-EXTRA_FLAGS="--include="$(realpath include/stubs.h)
+EXTRA_FLAGS="--analyzer-no-default-checks --include="$(realpath include/stubs.h)
 echo ${EXTRA_FLAGS} > extra_compile_flags.txt
 
 export CC_ANALYZER_BIN='clangsa:'${CSA}
