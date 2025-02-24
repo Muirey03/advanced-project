@@ -1,3 +1,5 @@
 cmake-build-debug/
 tests/reports/
+tests/xnu/reports/
+tests/xnu/extra_compile_flags.txt
 .DS_Store
