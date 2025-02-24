@@ -83,7 +83,7 @@ static DLLIST_NODE g_sExportCtxList;
 
 PVRSRV_ERROR
 DevmemIntAcquireRemoteCtx(PMR *psPMR,
-                          /*RETURNS_RETAINED*/ DEVMEMINT_CTX **ppsContext,
+                          DEVMEMINT_CTX **ppsContext,
                           IMG_HANDLE *phPrivData)
 {
   PDLLIST_NODE psListNode, psListNodeNext;
@@ -123,7 +123,7 @@ static PVRSRV_ERROR _DevmemIntAcquireRemoteCtxpsContextIntRelease(void *pvData)
 	return PVRSRV_OK;
 }
 
-static IMG_INT
+THREAD_ENTRY static IMG_INT
 PVRSRVBridgeDevmemIntAcquireRemoteCtx(IMG_UINT32 ui32DispatchTableEntry,
 				      IMG_UINT8 * psDevmemIntAcquireRemoteCtxIN_UI8,
 				      IMG_UINT8 * psDevmemIntAcquireRemoteCtxOUT_UI8,

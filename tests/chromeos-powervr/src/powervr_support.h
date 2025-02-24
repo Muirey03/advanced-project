@@ -16,6 +16,7 @@
 #define TRACKED __attribute__((annotate("rc_ownership_tracked")))
 #define RETAINED __attribute__((annotate("rc_ownership_retained")))
 #define RETURNS_RETAINED __attribute__((annotate("rc_ownership_returns_retained")))
+#define THREAD_ENTRY __attribute__((annotate("thread_entrypoint")))
 
 #include "dllist.h"
 

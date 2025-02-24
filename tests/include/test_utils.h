@@ -7,11 +7,13 @@
 
 #include <atomic>
 #include <pthread.h>
+#include <assert.h>
 
 #define RETAINED __attribute__((annotate("rc_ownership_retained")))
 #define CONSUMED __attribute__((annotate("rc_ownership_consumed")))
 #define RETURNS_RETAINED __attribute__((annotate("rc_ownership_returns_retained")))
 #define TRACKED __attribute__((annotate("rc_ownership_tracked")))
+#define THREAD_ENTRY __attribute__((annotate("thread_entrypoint")))
 
 struct TRACKED rc_object {
 	std::atomic<int> refcnt{1};

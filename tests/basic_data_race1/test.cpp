@@ -7,7 +7,7 @@
 
 OSObject *gObj;
 
-void thread_func() {
+THREAD_ENTRY void thread_func() {
   // test with no lock:
   if (gObj) {
     gObj->release(); // BUG

@@ -23,7 +23,7 @@ public:
 pthread_mutex_t g_lock;
 MyObject *gObj;
 
-void thread_func() {
+THREAD_ENTRY void thread_func() {
   pthread_mutex_lock(&g_lock);
   MyObject *obj = gObj;
   obj->retain();

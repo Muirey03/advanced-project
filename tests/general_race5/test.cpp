@@ -17,12 +17,12 @@ void foo(void *data, size_t sz) {
 void bar(rc_object *x) {
 }
 
-void thread_func() {
+THREAD_ENTRY void thread_func() {
   rc_object *obj = get_object();
   void *data = obj->data;
   size_t sz = obj->sz;
 
-  foo(data, sz); // NOBUG
+  foo(data, sz); // NOBUG // TODO: revisit this
   rc_obj_release(obj);
   foo(data, sz); // BUG
 }

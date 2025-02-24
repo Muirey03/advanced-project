@@ -9,7 +9,7 @@
 OSObject *gObj;
 pthread_mutex_t g_lock;
 
-void thread_func() {
+THREAD_ENTRY void thread_func() {
   // this is unsafe, as gObj can be destroyed before the lock is acquired
   OSObject *stackRef = gObj;
   pthread_mutex_lock(&g_lock);
