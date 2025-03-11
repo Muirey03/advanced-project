@@ -1,0 +1,30 @@
+diff --git a/osfmk/vm/vm_object.h b/osfmk/vm/vm_object.h
+index d39d4f9da..e3233889e 100644
+--- a/osfmk/vm/vm_object.h
++++ b/osfmk/vm/vm_object.h
+@@ -786,7 +786,7 @@ __private_extern__ void vm_object_set_size(
+ 	(RLObject)->ref_count++;                        \
+ 	assert((RLObject)->ref_count > 1);              \
+ 	MACRO_END
+-
++#undef vm_object_reference_locked
+ 
+ #define vm_object_reference_shared(object)              \
+ 	MACRO_BEGIN                                     \
+@@ -796,7 +796,7 @@ __private_extern__ void vm_object_set_size(
+ 	OSAddAtomic(1, &(RLObject)->ref_count);         \
+ 	assert((RLObject)->ref_count > 0);              \
+ 	MACRO_END
+-
++#undef vm_object_reference_shared
+ 
+ __private_extern__ void         vm_object_reference(
+ 	vm_object_t     object);
+@@ -812,6 +812,7 @@ MACRO_BEGIN                                             \
+ 	        vm_object_unlock(RObject);              \
+ 	}                                               \
+ MACRO_END
++#undef vm_object_reference
+ 
+ #endif  /* MACH_ASSERT */
+ 
