@@ -6,25 +6,23 @@
 #include <pthread.h>
 #include <test_utils.h>
 
-extern "C" int create_object(rc_object **);
-
 extern "C" rc_object *get_object();
 
 void foo(void *data, size_t sz) {
   memset(data, 0, sz);
 }
 
-void bar(rc_object *x) {
-}
-
-THREAD_ENTRY void thread_func() {
-  rc_object *obj = get_object();
+THREAD_ENTRY void thread_func_internal(rc_object *obj) {
   void *data = obj->data;
   size_t sz = obj->sz;
 
   foo(data, sz); // NOBUG // TODO: revisit this
   rc_obj_release(obj);
   foo(data, sz); // BUG
+}
+
+void thread_func() {
+  thread_func_internal(get_object());
 }
 
 int main() {
