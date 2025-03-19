@@ -1,2 +1,3 @@
+DumpCoverage: false
 Entrypoints:
   - memory_object_lock_request
