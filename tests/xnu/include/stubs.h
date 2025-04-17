@@ -26,27 +26,11 @@ extern void vm_object_deallocate(CONSUMED struct vm_object* object);
 struct TRACKED ipc_port;
 extern void ip_release(CONSUMED struct ipc_port*);
 extern void ip_reference(RETAINED struct ipc_port*);
-
-struct TRACKED task;
-extern void task_deallocate_grp(CONSUMED struct task*, uint32_t);
-extern void task_reference_grp(RETAINED struct task*, uint32_t);
-
-struct TRACKED ipc_voucher;
-extern void ipc_voucher_release(CONSUMED struct ipc_voucher*);
-extern void ipc_voucher_reference(RETAINED struct ipc_voucher*);
+extern void ipc_port_release_send(CONSUMED struct ipc_port*);
 #endif
 
-// TODO: struct socket
-
-struct TRACKED fsevent_handle;
-
-struct TRACKED ip_moptions;
-extern void imo_addref(RETAINED struct ip_moptions *imo, int locked);
-extern void imo_remref(CONSUMED struct ip_moptions *imo);
-
-struct TRACKED fileglob;
-struct proc;
-extern int fg_drop(struct proc* p, CONSUMED struct fileglob *fg);
-extern void fg_ref(struct proc* p, RETAINED struct fileglob *fg);
+struct TRACKED socket;
+void _sock_ref(RETAINED struct socket *);
+void _sock_rel(CONSUMED struct socket *);
 
 #endif

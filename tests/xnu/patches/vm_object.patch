@@ -1,5 +1,5 @@
 diff --git a/osfmk/vm/vm_object.h b/osfmk/vm/vm_object.h
-index d39d4f9da..9575e10cc 100644
+index d39d4f9da..4ae8176e2 100644
 --- a/osfmk/vm/vm_object.h
 +++ b/osfmk/vm/vm_object.h
 @@ -786,6 +786,7 @@ __private_extern__ void vm_object_set_size(
@@ -26,3 +26,17 @@ index d39d4f9da..9575e10cc 100644
  
  #endif  /* MACH_ASSERT */
  
+@@ -1331,9 +1334,10 @@ extern int      vm_object_cache_evict(int, int);
+ 	   (object)->vo_ledger_tag == 0) ||                             \
+ 	  (object)->vo_owner == TASK_NULL)                              \
+ 	 ? TASK_NULL    /* not owned */                                 \
+-	 : (((object)->vo_owner == VM_OBJECT_OWNER_DISOWNED)            \
+-	    ? kernel_task /* disowned -> kernel */                      \
+-	    : (object)->vo_owner)) /* explicit owner */                 \
++	 : (object)->vo_owner) /* explicit owner */
++	//  : (((object)->vo_owner == VM_OBJECT_OWNER_DISOWNED)            \
++	//     ? kernel_task /* disowned -> kernel */                      \
++	//     : (object)->vo_owner)) /* explicit owner */                 \
+ 
+ extern void     vm_object_ledger_tag_ledgers(
+ 	vm_object_t object,
