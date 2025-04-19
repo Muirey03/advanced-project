@@ -25,6 +25,7 @@ THREAD_ENTRY void thread_func() {
 
   rc_obj_release(obj); // potentially destroys obj, data is now unsafe
   pthread_mutex_lock(&g_lock);
+  gObj = nullptr;
   foo(data, sz); // BUG
   pthread_mutex_unlock(&g_lock);
 }

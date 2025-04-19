@@ -14,6 +14,7 @@
 #define RETURNS_RETAINED __attribute__((annotate("rc_ownership_returns_retained")))
 #define TRACKED __attribute__((annotate("rc_ownership_tracked")))
 #define THREAD_ENTRY __attribute__((annotate("thread_entrypoint")))
+#define SHARED __attribute__((annotate("shared_resource")))
 
 struct TRACKED rc_object {
 	std::atomic<int> refcnt{1};
@@ -38,7 +39,7 @@ public:
 
 	void release() {
 		int old_refcnt = refCount.fetch_sub(1, std::memory_order_acq_rel);
-		assert(old_refcnt > 0);
+		if (old_refcnt <= 0) { abort(); }
 		if (old_refcnt == 1) {
 			delete this;
 		}

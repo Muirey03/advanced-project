@@ -16,7 +16,8 @@ THREAD_ENTRY void thread_func_internal(rc_object *obj) {
   void *data = obj->data;
   size_t sz = obj->sz;
 
-  foo(data, sz); // NOBUG // TODO: revisit this
+  foo(data, sz);
+  // NOBUG: fields on objects are assumed to have the same lifetime as the object itself unless they themselves are tracked too
   rc_obj_release(obj);
   foo(data, sz); // BUG
 }
