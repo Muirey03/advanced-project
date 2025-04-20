@@ -27,6 +27,34 @@ function(add_simple_unit_test TEST_NAME SOURCES)
             COMMENT "Running test \"${TEST_NAME}\" with Infer:"
     )
 
+    if (DEFINED RELAY_DIR AND RELAY_DIR AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/test.c")
+        add_custom_command(
+                OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/gcc-log.txt
+                COMMAND ${CMAKE_COMMAND} -E echo "duppy -c -I../include -Wno-attributes -Wno-builtin-declaration-mismatch -Wno-free-nonheap-object test.c" > ${CMAKE_CURRENT_SOURCE_DIR}/gcc-log.txt
+                COMMAND ${CMAKE_COMMAND} -E echo "rm test.o" >> ${CMAKE_CURRENT_SOURCE_DIR}/gcc-log.txt
+                COMMENT "Generating gcc-log.txt for ${TEST_NAME}"
+                DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/test.c
+        )
+
+        add_custom_command(
+                OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/ciltrees
+                COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_SOURCE_DIR} ${RELAY_DIR}/scripts/dump-with-stats.sh
+                COMMAND ${CMAKE_COMMAND} -E rm -rf ${CMAKE_CURRENT_BINARY_DIR}/ciltrees
+                COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/ciltrees ${CMAKE_CURRENT_BINARY_DIR}/ciltrees
+                COMMAND ${CMAKE_COMMAND} -E rm -rf ${CMAKE_CURRENT_SOURCE_DIR}/ciltrees
+                COMMAND ${CMAKE_COMMAND} -E rm -f ${CMAKE_CURRENT_SOURCE_DIR}/gcc-log.txt
+                COMMENT "Running dump-with-stats.sh in ${TEST_NAME} to generate ciltrees"
+                DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/test.c
+                DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/gcc-log.txt
+        )
+
+        add_custom_target(${TEST_NAME}_relay
+                COMMAND ${CMAKE_COMMAND} -E chdir ${RELAY_DIR} ./relay_single.sh ${CMAKE_CURRENT_BINARY_DIR}/ciltrees > ${REPORTS_DIR}/${TEST_NAME}_relay.txt
+                DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/ciltrees 
+                COMMENT "Running test \"${TEST_NAME}\" with RELAY:"
+        )
+    endif ()
+
     add_executable(${TEST_NAME}_nosan ${SOURCES})
     target_include_directories(${TEST_NAME}_nosan
             PRIVATE

@@ -33,8 +33,8 @@ THREAD_ENTRY void thread_func() {
   if (obj->field0) {
     obj->field0->release(); // BUG
     obj->field0 = NULL;
-    obj->release();
   }
+  obj->release();
 }
 
 int main() {

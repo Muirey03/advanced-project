@@ -5,7 +5,6 @@
 #ifndef TEST_UTILS_H
 #define TEST_UTILS_H
 
-#include <atomic>
 #include <pthread.h>
 #include <assert.h>
 
@@ -17,14 +16,15 @@
 #define SHARED __attribute__((annotate("shared_resource")))
 
 struct TRACKED rc_object {
-	std::atomic<int> refcnt;
+	int refcnt;
+	struct rc_object *child;
 	pthread_mutex_t lock;
 	void *data;
 	size_t sz;
 };
 
 inline void rc_obj_retain(RETAINED struct rc_object *obj) {
-	obj->refcnt.fetch_add(1, std::memory_order_relaxed);
+	__atomic_fetch_add(&obj->refcnt, 1, __ATOMIC_RELAXED);
 }
 
 inline void rc_obj_destroy(struct rc_object *o) {
@@ -32,7 +32,7 @@ inline void rc_obj_destroy(struct rc_object *o) {
 }
 
 inline void rc_obj_release(CONSUMED struct rc_object *obj) {
-	int old_refcnt = obj->refcnt.fetch_sub(1, std::memory_order_acq_rel);
+	int old_refcnt = __atomic_fetch_sub(&obj->refcnt, 1, __ATOMIC_ACQ_REL);
 	assert(old_refcnt > 0);
 	if (old_refcnt == 1) {
 		rc_obj_destroy(obj);
@@ -50,6 +50,9 @@ inline struct rc_object *get_object() {
 
 inline void rc_obj_lock(struct rc_object *obj) { pthread_mutex_lock(&obj->lock); }
 inline void rc_obj_unlock(struct rc_object *obj) { pthread_mutex_unlock(&obj->lock); }
+
+#ifdef __cplusplus
+#include <atomic>
 
 class OSMetaClassBase {
 };
@@ -76,5 +79,7 @@ public:
 private:
 	std::atomic<int> refCount{1};
 };
+
+#endif
 
 #endif //TEST_UTILS_H

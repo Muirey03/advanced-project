@@ -37,8 +37,8 @@ public:
     if (obj->field0) {
       obj->field0->release(); // BUG
       obj->field0 = NULL;
-      obj->release();
     }
+    obj->release();
   }
 
 private:
