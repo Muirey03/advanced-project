@@ -1,3 +1,5 @@
+// clang-format off
+
 #include <stdint.h>
 #include <errno.h>
 #include <stdbool.h>
@@ -41,14 +43,13 @@ flow_divert_pcb_create(socket_t so)
 }
 
 static errno_t
-flow_divert_pcb_insert(struct flow_divert_pcb *fd_cb, uint32_t ctl_unit)
-{
-	errno_t                                                 error                                           = 0;
-	struct                                          flow_divert_pcb *exist          = NULL;
-	struct flow_divert_group        *group;
-	static uint32_t                         g_nextkey                                       = 1;
-	static uint32_t                         g_hash_seed                                     = 0;
-	int                                                     try_count                                       = 0;
+flow_divert_pcb_insert(struct flow_divert_pcb *fd_cb, uint32_t ctl_unit) {
+	errno_t error = 0;
+	struct flow_divert_pcb *exist = NULL;
+	struct flow_divert_group *group;
+	static uint32_t g_nextkey = 1;
+	static uint32_t g_hash_seed = 0;
+	int try_count = 0;
 
 	if (ctl_unit == 0 || ctl_unit >= GROUP_COUNT_MAX) {
 		return EINVAL;
@@ -139,6 +140,11 @@ flow_divert_pcb_init_internal(struct socket *so, uint32_t ctl_unit, uint32_t agg
 	}
 
 	fd_cb = flow_divert_pcb_create(so);
+
+	// Race detector doesn't know that fd_cb is shared, if we instead read fd_cb from so->so_fd_pcb then it finds the bug:
+	// fd_cb = so->so_fd_pcb;
+	// fd_cb->so = so;
+
 	if (fd_cb != NULL) {
 		so->so_fd_pcb = fd_cb;
 		so->so_flags |= SOF_FLOW_DIVERT;
@@ -173,38 +179,38 @@ flow_divert_pcb_init_internal(struct socket *so, uint32_t ctl_unit, uint32_t agg
 	return error;
 }
 
-
-void disconnectx(socket_t so) {
+THREAD_ENTRY void
+disconnectx(socket_t so) {
+	socket_lock(so, 0);
 	FDRELEASE(so->so_fd_pcb);
 	so->so_fd_pcb = NULL;
+	socket_unlock(so, 0);
 }
 
-errno_t
-flow_divert_pcb_init(struct socket *so)
-{
+THREAD_ENTRY errno_t
+flow_divert_pcb_init(struct socket *so) {
+	socket_lock(so, 0);
 	struct inpcb *inp = sotoinpcb(so);
 	uint32_t aggregate_units = 0;
 	uint32_t ctl_unit = necp_socket_get_flow_divert_control_unit(inp, &aggregate_units);
-	return flow_divert_pcb_init_internal(so, ctl_unit, aggregate_units);
+	errno_t err = flow_divert_pcb_init_internal(so, ctl_unit, aggregate_units);
+	socket_unlock(so, 0);
+	return err;
 }
 
 socket_t shared_so = NULL;
 
-void* thread1(void* unsued) {
-	socket_lock(shared_so, 0);
+void *thread1(void *unsued) {
 	flow_divert_pcb_init(shared_so);
-	socket_unlock(shared_so, 0);
 }
 
-void* thread2(void* unsued) {
-	socket_lock(shared_so, 0);
+void *thread2(void *unsued) {
 	disconnectx(shared_so);
-	socket_unlock(shared_so, 0);
 }
 
 int main() {
 	for (;;) {
-		shared_so = malloc(sizeof(struct socket));
+		shared_so = (socket_t) malloc(sizeof(struct socket));
 		pthread_t t1, t2;
 		pthread_create(&t1, NULL, thread1, NULL);
 		pthread_create(&t2, NULL, thread2, NULL);

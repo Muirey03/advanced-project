@@ -27,13 +27,14 @@ typedef int errno_t;
 
 struct flow_divert_pcb;
 
-struct socket {
+struct TRACKED socket {
 	lck_mtx_t mtx;
-	SHARED struct flow_divert_pcb* so_fd_pcb;
+	SHARED struct flow_divert_pcb *so_fd_pcb;
 	uint32_t so_flags;
 	uint16_t so_type;
 };
-typedef struct socket* socket_t;
+
+typedef struct socket *socket_t;
 
 #define SOCK_TYPE(so) so->so_type
 #define SOCK_STREAM 1
@@ -49,7 +50,7 @@ struct TRACKED flow_divert_pcb {
 	uint32_t hash;
 	uint32_t flags;
 	uint8_t log_level;
-	struct flow_divert_group* group;
+	struct flow_divert_group *group;
 	uint32_t control_group_unit;
 	uint32_t aggregate_unit;
 	uint32_t policy_control_unit;
@@ -61,10 +62,13 @@ struct TRACKED flow_divert_pcb {
 #define SOF_FLOW_DIVERT         0x00800000
 
 struct inpcb;
-extern struct inpcb *sotoinpcb(struct socket*);
-extern uint32_t necp_socket_get_flow_divert_control_unit(struct inpcb *, uint32_t*);
 
-static inline unsigned long RandomULong(void) { return (unsigned long)rand(); }
+extern struct inpcb *sotoinpcb(struct socket *);
+
+extern uint32_t necp_socket_get_flow_divert_control_unit(struct inpcb *, uint32_t *);
+
+static inline unsigned long RandomULong(void) { return (unsigned long) rand(); }
 
 extern uint32_t net_flowhash(const void *key, uint32_t len, const uint32_t seed);
+
 extern uint32_t flow_divert_derive_kernel_control_unit(uint32_t, uint32_t *, bool *);
