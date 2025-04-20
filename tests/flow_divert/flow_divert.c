@@ -175,12 +175,8 @@ flow_divert_pcb_init_internal(struct socket *so, uint32_t ctl_unit, uint32_t agg
 
 
 void disconnectx(socket_t so) {
-	socket_lock(so, 0);
-
 	FDRELEASE(so->so_fd_pcb);
 	so->so_fd_pcb = NULL;
-
-	socket_unlock(so, 0);
 }
 
 errno_t
@@ -195,11 +191,15 @@ flow_divert_pcb_init(struct socket *so)
 socket_t shared_so = NULL;
 
 void* thread1(void* unsued) {
+	socket_lock(shared_so, 0);
 	flow_divert_pcb_init(shared_so);
+	socket_unlock(shared_so, 0);
 }
 
 void* thread2(void* unsued) {
+	socket_lock(shared_so, 0);
 	disconnectx(shared_so);
+	socket_unlock(shared_so, 0);
 }
 
 int main() {

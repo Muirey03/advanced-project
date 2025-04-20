@@ -29,7 +29,7 @@ struct flow_divert_pcb;
 
 struct socket {
 	lck_mtx_t mtx;
-	struct flow_divert_pcb* so_fd_pcb;
+	SHARED struct flow_divert_pcb* so_fd_pcb;
 	uint32_t so_flags;
 	uint16_t so_type;
 };
