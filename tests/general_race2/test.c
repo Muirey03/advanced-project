@@ -29,6 +29,8 @@ THREAD_ENTRY void* thread_func(void* unused) {
 }
 
 int main() {
+  pthread_mutex_init(&g_lock, NULL);
+  
   printf("Testing sequential execution...\n");
   for (int i = 0; i < 2000; i++) {
     gObj = get_object();

@@ -11,14 +11,29 @@ pthread_mutex_t g_lock;
 struct rc_object *gObj;
 
 THREAD_ENTRY void* thread_func(void* unused) {
-  // this is unsafe, as gObj can be destroyed before the lock is acquired
-  struct rc_object *stackRef = gObj;
   pthread_mutex_lock(&g_lock);
-
-  if (stackRef) {
-    rc_object_release(stackRef); // BUG
-    gObj = NULL;
+  struct rc_object *stackRef = gObj;
+  if (!stackRef) {
+    pthread_mutex_unlock(&g_lock);
+    return NULL;
   }
+  rc_object_retain(stackRef);
+  pthread_mutex_unlock(&g_lock);
+
+  // dropping the lock here is safe for now as we hold a stack reference
+  usleep(10);
+
+  pthread_mutex_lock(&g_lock);
+  rc_object_release(stackRef);
+  pthread_mutex_unlock(&g_lock);
+
+  // dropping the lock here is unsafe as we released our stack reference
+  usleep(10);
+
+  pthread_mutex_lock(&g_lock);
+  memset(stackRef->data, 0, stackRef->sz); // BUG
+  rc_object_release(stackRef);
+  gObj = NULL;
   pthread_mutex_unlock(&g_lock);
   return NULL;
 }
