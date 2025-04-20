@@ -96,8 +96,8 @@ DevmemIntAcquireRemoteCtx(PMR *psPMR,
     psCtxExport = IMG_CONTAINER_OF(psListNode, DEVMEMINT_CTX_EXPORT, sNode);
     if (psCtxExport->psPMR == psPMR)           // <---------------- if PMR object is equal
     {
-    	OSWRLockReleaseRead(g_hExportCtxListLock);      // <------------ [1] unlock the list lock
-    	DevmemIntCtxAcquire(psCtxExport->psDevmemCtx);  // <--------- [2] increase refcount
+      OSWRLockReleaseRead(g_hExportCtxListLock);      // <------------ [1] unlock the list lock
+      DevmemIntCtxAcquire(psCtxExport->psDevmemCtx);  // <--------- [2] increase refcount
       *ppsContext = psCtxExport->psDevmemCtx;         // <-------------- [3]get the object
       *phPrivData = psCtxExport->psDevmemCtx->hPrivData;  // <---------- [4]get the object
 
@@ -247,5 +247,25 @@ DevmemIntAcquireRemoteCtx_exit:
 
 	}
 
+	return 0;
+}
+
+CONNECTION_DATA* g_conn = NULL;
+
+void* thread(void* unused) {
+	IMG_UINT8 in[0x100];
+	IMG_UINT8 out[0x100];
+	PVRSRVBridgeDevmemIntAcquireRemoteCtx(0, in, out, g_conn);
+	return NULL;
+}
+
+int main() {
+	g_conn = malloc(sizeof(CONNECTION_DATA));
+
+	pthread_t t1, t2;
+	pthread_create(&t1, NULL, thread, NULL);
+	pthread_create(&t2, NULL, thread, NULL);
+	pthread_join(t1, NULL);
+	pthread_join(t2, NULL);
 	return 0;
 }

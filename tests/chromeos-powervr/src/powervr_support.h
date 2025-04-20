@@ -21,6 +21,7 @@
 #include "dllist.h"
 
 /* Get a structure's address from the address of a member */
+#define _Static_assert(x)
 #define IMG_CONTAINER_OF(ptr, type, member) \
 (type *) (ptr); _Static_assert(offsetof(type, member) == 0)
 

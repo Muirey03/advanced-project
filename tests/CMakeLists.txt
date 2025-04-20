@@ -46,8 +46,8 @@ function(add_relay_test TEST_NAME SOURCES)
     if (DEFINED RELAY_DIR AND RELAY_DIR)
     add_custom_command(
             OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/gcc-log.txt
-            COMMAND ${CMAKE_COMMAND} -E echo "duppy -c -I../include -Wno-attributes -Wno-builtin-declaration-mismatch -Wno-free-nonheap-object ${SOURCES}" > ${CMAKE_CURRENT_SOURCE_DIR}/gcc-log.txt
-            COMMAND ${CMAKE_COMMAND} -E echo "rm test.o" >> ${CMAKE_CURRENT_SOURCE_DIR}/gcc-log.txt
+            COMMAND ${CMAKE_COMMAND} -E echo "duppy -c -o a.out -I../include -Wno-attributes -Wno-builtin-declaration-mismatch -Wno-free-nonheap-object ${SOURCES}" > ${CMAKE_CURRENT_SOURCE_DIR}/gcc-log.txt
+            COMMAND ${CMAKE_COMMAND} -E echo "rm a.out" >> ${CMAKE_CURRENT_SOURCE_DIR}/gcc-log.txt
             COMMENT "Generating gcc-log.txt for ${TEST_NAME}"
             DEPENDS ${SOURCES}
     )
@@ -91,6 +91,7 @@ set(ALL_TESTS
         no_general_race5
         general_race6
         chromeos-powervr
+        flow_divert
 )
 
 foreach (test_dir IN LISTS ALL_TESTS)
