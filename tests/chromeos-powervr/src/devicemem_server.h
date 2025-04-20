@@ -44,12 +44,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #ifndef DEVICEMEM_SERVER_H
 #define DEVICEMEM_SERVER_H
 
-#include "powervr_support.h"
-
 struct _DEVMEMINT_CTX_;
 struct _DEVMEMINT_CTX_EXPORT_;
 typedef struct _DEVMEMINT_CTX_ DEVMEMINT_CTX;
 typedef struct _DEVMEMINT_CTX_EXPORT_ DEVMEMINT_CTX_EXPORT;
+
+#include "powervr_support.h"
 
 /*
  * DevmemIntCtxDestroy()
