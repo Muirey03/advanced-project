@@ -25,10 +25,13 @@ int main() {
   pthread_mutex_init(&g_lock, NULL);
   for (;;) {
     gObj = OSObject::create();
-    std::thread t1(thread_func);
-    std::thread t2(thread_func);
-    t1.join();
-    t2.join();
+    // std::thread t1(thread_func);
+    // std::thread t2(thread_func);
+
+    thread_func();
+    thread_func();
+    // t1.join();
+    // t2.join();
   }
   return 0;
 }

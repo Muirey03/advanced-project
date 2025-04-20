@@ -27,6 +27,12 @@ function(add_simple_unit_test TEST_NAME SOURCES)
             COMMENT "Running test \"${TEST_NAME}\" with Infer:"
     )
 
+    add_executable(${TEST_NAME}_nosan ${SOURCES})
+    target_include_directories(${TEST_NAME}_nosan
+            PRIVATE
+            ${INCLUDE_DIR}
+    )
+
     add_executable(${TEST_NAME}_tsan ${SOURCES})
     target_compile_options(${TEST_NAME}_tsan PRIVATE -fsanitize=thread)
     target_link_options(${TEST_NAME}_tsan PRIVATE -fsanitize=thread)

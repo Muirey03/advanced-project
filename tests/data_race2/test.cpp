@@ -2,6 +2,7 @@
 // Created by tommy on 14/11/2024.
 //
 
+#include <iostream>
 #include <thread>
 #include <test_utils.h>
 
@@ -29,15 +30,25 @@ THREAD_ENTRY void thread_func() {
   obj->retain();
   pthread_mutex_unlock(&g_lock);
 
-  obj->field0->release(); // BUG
-  obj->field0 = NULL;
-
-  obj->release();
+  if (obj->field0) {
+    obj->field0->release(); // BUG
+    obj->field0 = NULL;
+    obj->release();
+  }
 }
 
 int main() {
   pthread_mutex_init(&g_lock, NULL);
-  for (;;) {
+
+  std::cout << "Testing sequential execution...\n";
+  for (int i = 0; i < 2000; i++) {
+    gObj = MyObject::create();
+    thread_func();
+    thread_func();
+  }
+
+  std::cout << "Success!\n\nTesting parallel execution...\n";
+  for (int i = 0; i < 2000; i++) {
     gObj = MyObject::create();
     std::thread t1(thread_func);
     std::thread t2(thread_func);

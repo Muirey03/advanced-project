@@ -17,15 +17,36 @@
 #define SHARED __attribute__((annotate("shared_resource")))
 
 struct TRACKED rc_object {
-	std::atomic<int> refcnt{1};
+	std::atomic<int> refcnt;
 	pthread_mutex_t lock;
 	void *data;
 	size_t sz;
 };
 
-void rc_obj_retain(RETAINED struct rc_object *obj);
+inline void rc_obj_retain(RETAINED struct rc_object *obj) {
+	obj->refcnt.fetch_add(1, std::memory_order_relaxed);
+}
 
-void rc_obj_release(CONSUMED struct rc_object *obj);
+inline void rc_obj_destroy(struct rc_object *o) {
+	free(o->data);
+}
+
+inline void rc_obj_release(CONSUMED struct rc_object *obj) {
+	int old_refcnt = obj->refcnt.fetch_sub(1, std::memory_order_acq_rel);
+	assert(old_refcnt > 0);
+	if (old_refcnt == 1) {
+		rc_obj_destroy(obj);
+	}
+}
+
+inline struct rc_object *get_object() {
+	struct rc_object *o = (struct rc_object *) malloc(sizeof(struct rc_object));
+	o->refcnt = 1;
+	o->sz = 50;
+	o->data = malloc(o->sz);
+	pthread_mutex_init(&o->lock, NULL);
+	return o;
+}
 
 inline void rc_obj_lock(struct rc_object *obj) { pthread_mutex_lock(&obj->lock); }
 inline void rc_obj_unlock(struct rc_object *obj) { pthread_mutex_unlock(&obj->lock); }
@@ -39,10 +60,7 @@ public:
 
 	void release() {
 		int old_refcnt = refCount.fetch_sub(1, std::memory_order_acq_rel);
-		if (old_refcnt <= 0) { abort(); }
-		if (old_refcnt == 1) {
-			delete this;
-		}
+		assert(old_refcnt > 0);
 	}
 
 	void retain() {
