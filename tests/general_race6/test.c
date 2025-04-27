@@ -6,6 +6,7 @@
 #include <pthread.h>
 #include <test_utils.h>
 #include <unistd.h>
+#include <string.h>
 
 struct rc_object *gObj;
 pthread_mutex_t g_lock;
@@ -14,7 +15,7 @@ void foo(void *data, size_t sz) {
   memset(data, 0, sz);
 }
 
-THREAD_ENTRY void thread_func(void* unused) {
+THREAD_ENTRY void *thread_func(void *unused) {
   pthread_mutex_lock(&g_lock);
   struct rc_object *obj = gObj;
   if (!obj) {

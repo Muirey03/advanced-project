@@ -259,6 +259,8 @@ void* thread(void* unused) {
 	return NULL;
 }
 
+#include <stdlib.h>
+
 int main() {
 	g_conn = malloc(sizeof(CONNECTION_DATA));
 

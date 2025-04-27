@@ -6,6 +6,7 @@
 #include <pthread.h>
 #include <test_utils.h>
 #include <unistd.h>
+#include <string.h>
 
 void foo(void *data, size_t sz) {
   memset(data, 0, sz);
@@ -26,7 +27,7 @@ THREAD_ENTRY void thread_func_internal(struct rc_object *obj) {
 pthread_mutex_t g_lock;
 struct rc_object *gObj;
 
-void* thread_func1(void* unused) {
+void *thread_func1(void *unused) {
   pthread_mutex_lock(&g_lock);
   struct rc_object *obj = gObj;
   if (!obj) {
@@ -40,7 +41,7 @@ void* thread_func1(void* unused) {
   return NULL;
 }
 
-void thread_func2(void* unused) {
+void *thread_func2(void *unused) {
   pthread_mutex_lock(&g_lock);
   if (gObj) {
     rc_obj_release(gObj);
