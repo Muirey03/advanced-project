@@ -10,11 +10,13 @@
 #include <pthread.h>
 #include <assert.h>
 #include <stddef.h>
+#include <stdlib.h>
 
 #define INLINE inline
 #define __packed __attribute__((__packed__))
 #define TRACKED __attribute__((annotate("rc_ownership_tracked")))
 #define RETAINED __attribute__((annotate("rc_ownership_retained")))
+#define CONSUMED __attribute__((annotate("rc_ownership_consumed")))
 #define RETURNS_RETAINED __attribute__((annotate("rc_ownership_returns_retained")))
 #define THREAD_ENTRY __attribute__((annotate("thread_entrypoint")))
 
@@ -74,6 +76,8 @@ typedef enum {
 #include "handle_types.h"
 #undef HANDLETYPE
 } PVRSRV_HANDLE_TYPE;
+
+#define KERNEL_HANDLE_BASE NULL
 
 /*! Physical Memory Resource type.
  */
@@ -151,6 +155,14 @@ IMG_BOOL PMR_IsMemLayoutFixed(PMR *psPMR) {
   return IMG_TRUE;
 }
 
+PVRSRV_ERROR PVRSRVDestroyHandleStagedUnlocked(PVRSRV_HANDLE_BASE *psBase,
+                                               IMG_HANDLE hHandle,
+                                               PVRSRV_HANDLE_TYPE eType) {
+  return PVRSRV_OK;
+}
+
+PVRSRV_ERROR DevmemIntExportCtx(DEVMEMINT_CTX *c, PMR *p, DEVMEMINT_CTX_EXPORT **e);
+
 /*******************************************
             DevmemIntAcquireRemoteCtx
  *******************************************/
@@ -169,6 +181,19 @@ typedef struct PVRSRV_BRIDGE_OUT_DEVMEMINTACQUIREREMOTECTX_TAG {
 }
     __packed PVRSRV_BRIDGE_OUT_DEVMEMINTACQUIREREMOTECTX;
 
+/* Bridge in structure for DevmemIntExportCtx */
+typedef struct PVRSRV_BRIDGE_IN_DEVMEMINTEXPORTCTX_TAG
+{
+	IMG_HANDLE hContext;
+	IMG_HANDLE hPMR;
+} __packed PVRSRV_BRIDGE_IN_DEVMEMINTEXPORTCTX;
+/* Bridge out structure for DevmemIntExportCtx */
+typedef struct PVRSRV_BRIDGE_OUT_DEVMEMINTEXPORTCTX_TAG
+{
+	IMG_HANDLE hContextExport;
+	PVRSRV_ERROR eError;
+} __packed PVRSRV_BRIDGE_OUT_DEVMEMINTEXPORTCTX;
+
 // Dummy implementations:
 
 #define ATOMIC_T uint32_t
@@ -176,8 +201,16 @@ typedef struct PVRSRV_BRIDGE_OUT_DEVMEMINTACQUIREREMOTECTX_TAG {
 void OSAtomicIncrement(ATOMIC_T *i) {
 }
 
+void OSAtomicDecrement(ATOMIC_T *i) {
+}
+
+void PMRUnrefPMR(PMR *p) {
+}
+
 #define POSWR_LOCK pthread_mutex_t
 #define OSWRLockAcquireRead(lock) pthread_mutex_lock(&lock)
 #define OSWRLockReleaseRead(lock) pthread_mutex_unlock(&lock)
+#define OSWRLockAcquireWrite(lock) pthread_mutex_lock(&lock)
+#define OSWRLockReleaseWrite(lock) pthread_mutex_unlock(&lock)
 
 #endif //POWERVR_SUPPORT_H

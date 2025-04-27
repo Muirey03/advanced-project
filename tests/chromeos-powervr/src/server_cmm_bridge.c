@@ -72,6 +72,11 @@ void DevmemIntCtxAcquire(RETAINED DEVMEMINT_CTX *psDevmemCtx)
   OSAtomicIncrement(&psDevmemCtx->hRefCount);
 }
 
+void DevmemIntCtxRelease(CONSUMED DEVMEMINT_CTX *psDevmemCtx)
+{
+  OSAtomicDecrement(&psDevmemCtx->hRefCount);
+}
+
 PVRSRV_ERROR
 DevmemIntCtxDestroy(DEVMEMINT_CTX *psDevmemCtx)
 {
@@ -250,9 +255,122 @@ DevmemIntAcquireRemoteCtx_exit:
 	return 0;
 }
 
+PVRSRV_ERROR
+DevmemIntUnexportCtx(DEVMEMINT_CTX_EXPORT *psContextExport)
+{
+	PMRUnrefPMR(psContextExport->psPMR);
+	DevmemIntCtxRelease(psContextExport->psDevmemCtx);
+	OSWRLockAcquireWrite(g_hExportCtxListLock);
+	dllist_remove_node(&psContextExport->sNode);
+	OSWRLockReleaseWrite(g_hExportCtxListLock);
+	free((void*)psContextExport);
+	/* Unable to find exported context, return error */
+	return PVRSRV_OK;
+}
+
+
+static PVRSRV_ERROR _DevmemIntExportCtxpsContextExportIntRelease(void *pvData)
+{
+	PVRSRV_ERROR eError;
+	eError = DevmemIntUnexportCtx((DEVMEMINT_CTX_EXPORT *) pvData);
+	return eError;
+}
+static IMG_INT
+PVRSRVBridgeDevmemIntExportCtx(IMG_UINT32 ui32DispatchTableEntry,
+			       IMG_UINT8 * psDevmemIntExportCtxIN_UI8,
+			       IMG_UINT8 * psDevmemIntExportCtxOUT_UI8,
+			       CONNECTION_DATA * psConnection)
+{
+	PVRSRV_BRIDGE_IN_DEVMEMINTEXPORTCTX *psDevmemIntExportCtxIN =
+	    (PVRSRV_BRIDGE_IN_DEVMEMINTEXPORTCTX *) IMG_OFFSET_ADDR(psDevmemIntExportCtxIN_UI8, 0);
+	PVRSRV_BRIDGE_OUT_DEVMEMINTEXPORTCTX *psDevmemIntExportCtxOUT =
+	    (PVRSRV_BRIDGE_OUT_DEVMEMINTEXPORTCTX *) IMG_OFFSET_ADDR(psDevmemIntExportCtxOUT_UI8,
+								     0);
+	IMG_HANDLE hContext = psDevmemIntExportCtxIN->hContext;
+	DEVMEMINT_CTX *psContextInt = NULL;
+	IMG_HANDLE hPMR = psDevmemIntExportCtxIN->hPMR;
+	PMR *psPMRInt = NULL;
+	DEVMEMINT_CTX_EXPORT *psContextExportInt = NULL;
+	/* Lock over handle lookup. */
+	LockHandle(psConnection->psHandleBase);
+	/* Look up the address from the handle */
+	psDevmemIntExportCtxOUT->eError =
+	    PVRSRVLookupHandleUnlocked(psConnection->psHandleBase,
+				       (void **)&psContextInt,
+				       hContext, PVRSRV_HANDLE_TYPE_DEVMEMINT_CTX, IMG_TRUE);
+	if (unlikely(psDevmemIntExportCtxOUT->eError != PVRSRV_OK))
+	{
+		UnlockHandle(psConnection->psHandleBase);
+		goto DevmemIntExportCtx_exit;
+	}
+	/* Look up the address from the handle */
+	psDevmemIntExportCtxOUT->eError =
+	    PVRSRVLookupHandleUnlocked(psConnection->psHandleBase,
+				       (void **)&psPMRInt,
+				       hPMR, PVRSRV_HANDLE_TYPE_PHYSMEM_PMR, IMG_TRUE);
+	if (unlikely(psDevmemIntExportCtxOUT->eError != PVRSRV_OK))
+	{
+		UnlockHandle(psConnection->psHandleBase);
+		goto DevmemIntExportCtx_exit;
+	}
+	/* Release now we have looked up handles. */
+	UnlockHandle(psConnection->psHandleBase);
+	psDevmemIntExportCtxOUT->eError =
+	    DevmemIntExportCtx(psContextInt, psPMRInt, &psContextExportInt);
+	/* Exit early if bridged call fails */
+	if (unlikely(psDevmemIntExportCtxOUT->eError != PVRSRV_OK))
+	{
+		goto DevmemIntExportCtx_exit;
+	}
+	/* Lock over handle creation. */
+	LockHandle(psConnection->psHandleBase);
+	psDevmemIntExportCtxOUT->eError = PVRSRVAllocHandleUnlocked(psConnection->psHandleBase,
+								    &psDevmemIntExportCtxOUT->
+								    hContextExport,
+								    (void *)psContextExportInt,
+								    PVRSRV_HANDLE_TYPE_DEVMEMINT_CTX_EXPORT,
+								    PVRSRV_HANDLE_ALLOC_FLAG_NONE,
+								    (PFN_HANDLE_RELEASE) &
+								    _DevmemIntExportCtxpsContextExportIntRelease);
+	if (unlikely(psDevmemIntExportCtxOUT->eError != PVRSRV_OK))
+	{
+		UnlockHandle(psConnection->psHandleBase);
+		goto DevmemIntExportCtx_exit;
+	}
+	/* Release now we have created handles. */
+	UnlockHandle(psConnection->psHandleBase);
+DevmemIntExportCtx_exit:
+	/* Lock over handle lookup cleanup. */
+	LockHandle(psConnection->psHandleBase);
+	/* Unreference the previously looked up handle */
+	if (psContextInt)
+	{
+		PVRSRVReleaseHandleUnlocked(psConnection->psHandleBase,
+					    hContext, PVRSRV_HANDLE_TYPE_DEVMEMINT_CTX);
+	}
+	/* Unreference the previously looked up handle */
+	if (psPMRInt)
+	{
+		PVRSRVReleaseHandleUnlocked(psConnection->psHandleBase,
+					    hPMR, PVRSRV_HANDLE_TYPE_PHYSMEM_PMR);
+	}
+	/* Release now we have cleaned up look up handles. */
+	UnlockHandle(psConnection->psHandleBase);
+	if (psDevmemIntExportCtxOUT->eError != PVRSRV_OK)
+	{
+		if (psContextExportInt)
+		{
+			LockHandle(KERNEL_HANDLE_BASE);
+			DevmemIntUnexportCtx(psContextExportInt);
+			UnlockHandle(KERNEL_HANDLE_BASE);
+		}
+	}
+	return 0;
+}
+
 CONNECTION_DATA* g_conn = NULL;
 
-void* thread(void* unused) {
+void* thread1(void* unused) {
 	IMG_UINT8 in[0x100];
 	IMG_UINT8 out[0x100];
 	PVRSRVBridgeDevmemIntAcquireRemoteCtx(0, in, out, g_conn);
@@ -261,12 +379,19 @@ void* thread(void* unused) {
 
 #include <stdlib.h>
 
+void* thread2(void* unused) {
+	IMG_UINT8 in[0x100];
+	IMG_UINT8 out[0x100];
+	PVRSRVBridgeDevmemIntExportCtx(0, in, out, g_conn);
+	return NULL;
+}
+
 int main() {
 	g_conn = malloc(sizeof(CONNECTION_DATA));
 
 	pthread_t t1, t2;
-	pthread_create(&t1, NULL, thread, NULL);
-	pthread_create(&t2, NULL, thread, NULL);
+	pthread_create(&t1, NULL, thread1, NULL);
+	pthread_create(&t2, NULL, thread2, NULL);
 	pthread_join(t1, NULL);
 	pthread_join(t2, NULL);
 	return 0;
